@@ -1,24 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import TimeSheetPage from './Pages/TimeSheet.js';
 
-function App() {
+import MyNavbar from './Components/Navbar.js';
+import Footer from './Components/Footer.js';
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <MyNavbar />
+      <Routes>
+        <Route path="/" element={<TimeSheetPage />} />
+        <Route path="/TimeSheet" element={<TimeSheetPage />} />
+      </Routes>
+      <Footer />
+    </Router>
   );
 }
 
