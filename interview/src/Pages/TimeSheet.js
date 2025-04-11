@@ -100,83 +100,123 @@ function TimeSheetPage() {
     const totalCost = totalTime * Number(rate || 0) / 60;
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-            <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-2xl">
-                <h1 className="text-3xl font-bold mb-6 text-center text-blue-600">Timesheet</h1>
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4" style={{ paddingTop: '100px', paddingBottom: '100px' }}>
+            <form className="p-4 bg-white rounded shadow hover-card container-md" style={{ maxWidth: '1000px' }}>
+                <h1 className="text-3xl font-bold mb-6 text-center text-blue-600" style={{ paddingBottom: '25px' }}>Timesheet</h1>
 
                 {/* Line Items */}
-                {lineItems.map((item, index) => (
-                    <div key={index} className="mb-4 flex gap-4">
-                        <input
-                            type="date"
-                            value={item.date}
-                            onChange={(e) => handleLineItemChange(index, "date", e.target.value)}
+                <div class="row justify-content-center">
+                    {lineItems.map((item, index) => (
+                        <div key={index} className="mb-4 d-flex justify-content-center align-items-center gap-3" >
+                            <input
+                                type="date"
+                                value={item.date}
+                                onChange={(e) => {
+                                    e.preventDefault();
+                                    handleLineItemChange(index, "date", e.target.value);
+                                }}
+                                className="form-control w-auto"
+                            />
+                            <input
+                                type="number"
+                                value={item.minutes}
+                                onChange={(e) => {
+                                    e.preventDefault();
+                                    handleLineItemChange(index, "minutes", e.target.value);
+                                }}
+                                className="form-control w-auto"
+                                placeholder="Minutes"
+                                min="0"
+                            />
+                        </div>
+                    ))}
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            addLineItem();
+                        }}
+                        class="btn btn-primary me-3 mb-4"
+                    >
+                        Add Day
+                    </button>
+                </div>
+
+                {/* Rate */}
+                <div className="row justify-content-center mb-4">
+                    <div className="col-md-4">
+                        <div className="form-floating mb-3">
+                            <input type="number" class="form-control" id="floatingRate" placeholder="rate" htmlFor="floatingRate"
+                                value={rate} onChange={(e) => {
+                                    e.preventDefault();
+                                    setRate(e.target.value);
+                                }} />
+                            <label htmlFor="floatingRate">Rate per hour</label>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Totals/Des/Save */}
+                <div className="d-flex justify-content-center gap-5 mb-4">
+                    <div className="text-center">
+                        <p className="fw-normal">
+                            Total Time: <span className="font-bold">{totalTime} Minutes </span>
+                        </p>
+                    </div>
+                    <div className="text-center">
+                        <p className="fw-normal">
+                            Total Pay: <span className="font-bold">${totalCost.toFixed(2)}</span>
+                        </p>
+                    </div>
+                </div>
+                <div className="row justify-content-center align-items-center mb-3">
+                    <div className="col-md-4">
+                        <textarea
+                            type="text"
+                            placeholder="Description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                             className="flex-1 border rounded-lg p-2"
-                        />
-                        <input
-                            type="number"
-                            value={item.minutes}
-                            onChange={(e) => handleLineItemChange(index, "minutes", e.target.value)}
-                            className="flex-1 border rounded-lg p-2"
-                            placeholder="Minutes"
+                            rows="5"
+                            style={{ width: '300px' }}
                             min="0"
                         />
                     </div>
-                ))}
-
-                <button
-                    type="button"
-                    onClick={addLineItem}
-                    className="mb-6 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                    Add Day
-                </button>
-
-                {/* Rate */}
-                <div className="mb-5">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Rate ($ Per Hour)</label>
-                    <input
-                        type="number"
-                        value={rate}
-                        onChange={(e) => setRate(e.target.value)}
-                        className="w-full border rounded-lg p-2"
-                        placeholder="Enter rate"
-                        min="0"
-                    />
                 </div>
 
-                {/* Totals */}
-                <div className="mt-6 border-t pt-4">
-                    <div className="text-lg font-medium text-gray-700">
-                        Total Time Worked: <span className="font-bold">{totalTime} Minutes </span>
-                    </div>
-                    <div className="text-lg font-medium text-gray-700">
-                        Total Pay: <span className="font-bold">${totalCost.toFixed(2)}</span>
-                    </div>
-                    <textarea
-                        type="text"
-                        placeholder="Description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="flex-1 border rounded-lg p-2"
-                        min="0"
-                    />
-                    <div>
-                        <Button variant="primary" className="mt-4" onClick={handleSave}>
-                            Save
-                        </Button>
-                    </div>
-                    <div>
-                        <Button variant="primary" className="mt-4" onClick={handleLoad}>
-                            Load Previous Data
-                        </Button>
-                    </div>
-                    <div>
-                        <Button variant="primary" className="mt-4" onClick={handleNavigation('/AuthPage')}>
-                            Sign In / Out
-                        </Button>
-                    </div>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button variant="primary" class="btn btn-primary me-3 mb-4" 
+                     onClick={(e) => {
+                        e.preventDefault();
+                        handleSave();
+                    }}>
+                        Save
+                    </button>
                 </div>
+
+
+                {/* Load/Sign in and Out */}
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button variant="primary" class="btn btn-primary me-3 mb-4"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLoad();
+                    }}>
+                        Load Previous Data
+                    </button>
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button variant="primary" class="btn btn-secondary me-3 mb-4" 
+                    onClick={(e) => {
+                        e.preventDefault();
+                        handleNavigation('/AuthPage')
+                        }}>
+                        Sign In / Out
+                    </button>
+                </div>
+
 
                 {/* Loaded Data */}
                 <div className="mt-6">
@@ -201,7 +241,7 @@ function TimeSheetPage() {
                         <p>No data loaded yet.</p>
                     )}
                 </div>
-            </div>
+            </form>
         </div>
     );
 }
