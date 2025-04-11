@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { signUp, logIn, logOut } from '../Utils/auth.js';
 import { useNavigate } from 'react-router-dom';
+import '../Styles/AuthPage.css'; 
+import { button } from 'react-bootstrap'; 
 
 const AuthPage = () => {
     const navigate = useNavigate();
@@ -68,9 +70,8 @@ const AuthPage = () => {
 
                 <p className="mt-4 text-center text-sm">
                     {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-                    <button
+                    <button type="button" class="btn btn-primary"
                         onClick={() => setIsSignUp(!isSignUp)}
-                        className="text-blue-600 cursor-pointer hover:underline"
                     >
                         {isSignUp ? 'Log In' : 'Sign Up'}
                     </button>
