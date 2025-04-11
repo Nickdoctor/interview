@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import '../Styles/TimeSheet.css';
 import React, { useState } from 'react';
-import { supabase } from '../supabaseClient'; // Import Supabase client
+import { supabase } from '../supabaseClient.js';
 
 function TimeSheetPage() {
     const [rate, setRate] = useState("");
@@ -24,7 +24,7 @@ function TimeSheetPage() {
             totalCost, // Total pay
         };
         const { data, error } = await supabase
-            .from('timesheets') // Replace 'timesheets' with your table name
+            .from('timesheets')
             .insert([savedData]);
 
         if (error) {
@@ -35,11 +35,21 @@ function TimeSheetPage() {
             alert('Data saved successfully!');
         }
         console.log("Saved Data:", savedData);
-        alert("Data saved successfully!");
+        //alert("Data saved successfully!");
         window.location.reload();
     };
-    const handleLoad = () => {
-        // Load data from supabase or local storage
+    const handleLoad = async () => {
+        const { data, error } = await supabase
+            .from('timesheets') // Replace 'timesheets' with your table name
+            .select('*');
+
+        if (error) {
+            console.error('Error loading data:', error);
+            alert('Failed to load data.');
+        } else {
+            console.log('Loaded data:', data);
+            // Update state with loaded data if needed
+        }
     };
 
 
@@ -119,6 +129,10 @@ function TimeSheetPage() {
                     <div>
                         <Button variant="primary" className="mt-4" onClick={handleLoad}>
                             Load Previous Data </Button>
+                    </div>
+                    <div>
+                        <Button variant="primary" className="mt-4" onClick={handleLogIn}>
+                            Log In </Button>
                     </div>
                 </div>
             </div>
