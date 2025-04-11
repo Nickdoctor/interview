@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 // Sign Up Function
 export const signUp = async (email, password) => {
@@ -21,6 +22,7 @@ export const logIn = async (email, password) => {
     email,
     password,
   });
+  console.log('Login session:', data?.session);
 
   if (error) {
     console.error('Error logging in:', error.message);
@@ -39,8 +41,9 @@ export const logOut = async () => {
     return { error: error.message };
   } else {
     console.log('User logged out successfully');
-    window.location.reload();
+    return { success: true };
+    //window.location.reload();
   }
 
-  return { success: true };
+  
 };
