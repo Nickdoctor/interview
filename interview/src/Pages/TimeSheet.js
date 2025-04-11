@@ -1,13 +1,27 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import '../Styles/TimeSheet.css';
-import React, { useState } from 'react';
 import { supabase } from '../supabaseClient.js';
 
 function TimeSheetPage() {
+    const navigate = useNavigate();
     const [rate, setRate] = useState("");
     const [description, setDescription] = useState("");
     const [lineItems, setLineItems] = useState([{ date: "", minutes: "" }]);
+    const [loadedData, setLoadedData] = useState([]); // State to store loaded data
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (!session) {
+                navigate('/AuthPage');
+            } else {
+                console.log('User is logged in:', session.user.email);
+            }
+        };
+        checkAuth();
+    }, []);
 
     const handleLineItemChange = (index, field, value) => {
         const updated = [...lineItems];
@@ -16,13 +30,25 @@ function TimeSheetPage() {
     };
 
     const handleSave = async () => {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError || !session) {
+            console.error('Error fetching session:', sessionError);
+            alert('You must be logged in to save data.');
+            return;
+        }
+
+        const userId = session.user.id; // Get the logged-in user's ID
+
         const savedData = {
+            userId: userId,
             lineItems, // Array of dates and hours
-            totalTime, // Total hours worked
+            totalTime: lineItems.reduce((sum, item) => sum + Number(item.minutes || 0), 0),
             rate, // Rate per hour
             description, // Description
-            totalCost, // Total pay
+            totalCost: lineItems.reduce((sum, item) => sum + Number(item.minutes || 0), 0) * Number(rate || 0) / 60,
         };
+
         const { data, error } = await supabase
             .from('timesheets')
             .insert([savedData]);
@@ -34,24 +60,37 @@ function TimeSheetPage() {
             console.log('Data saved:', data);
             alert('Data saved successfully!');
         }
-        console.log("Saved Data:", savedData);
-        //alert("Data saved successfully!");
         window.location.reload();
     };
+
     const handleLoad = async () => {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError || !session) {
+            console.error('Error fetching session:', sessionError);
+            alert('You must be logged in to load data.');
+            return;
+        }
+
+        const userId = session.user.id; // Get the logged-in user's ID
         const { data, error } = await supabase
-            .from('timesheets') // Replace 'timesheets' with your table name
-            .select('*');
+            .from('timesheets')
+            .select('*')
+            .eq('userId', userId) // Filter by user ID
+            .order('created_at', { ascending: false }); // Order by creation date
 
         if (error) {
             console.error('Error loading data:', error);
             alert('Failed to load data.');
         } else {
             console.log('Loaded data:', data);
-            // Update state with loaded data if needed
+            setLoadedData(data); // Update state with loaded data
         }
     };
 
+    const handleNavigation = (path) => {
+        return () => navigate(path);
+    };
 
     const addLineItem = () => {
         setLineItems([...lineItems, { date: "", minutes: "" }]);
@@ -124,16 +163,43 @@ function TimeSheetPage() {
                     />
                     <div>
                         <Button variant="primary" className="mt-4" onClick={handleSave}>
-                            Save </Button>
+                            Save
+                        </Button>
                     </div>
                     <div>
                         <Button variant="primary" className="mt-4" onClick={handleLoad}>
-                            Load Previous Data </Button>
+                            Load Previous Data
+                        </Button>
                     </div>
                     <div>
-                        <Button variant="primary" className="mt-4" onClick={handleLogIn}>
-                            Log In </Button>
+                        <Button variant="primary" className="mt-4" onClick={handleNavigation('/AuthPage')}>
+                            Sign In / Out
+                        </Button>
                     </div>
+                </div>
+
+                {/* Loaded Data */}
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-4">Loaded Data</h2>
+                    {loadedData.length > 0 ? (
+                        loadedData.map((item, index) => (
+                            <div key={index} className="mb-6 p-4 border rounded-lg shadow">
+                                <h3 className="text-lg font-bold mb-2">Entry {index + 1}</h3>
+                                {item.lineItems.map((lineItem, lineIndex) => (
+                                    <div key={lineIndex} className="mb-4 p-4 border rounded-lg shadow bg-gray-50">
+                                        <p><strong>Date:</strong> {lineItem.date}</p>
+                                        <p><strong>Minutes:</strong> {lineItem.minutes}</p>
+                                    </div>
+                                ))}
+                                <p><strong>Total Time:</strong> {item.totalTime} minutes</p>
+                                <p><strong>Rate:</strong> ${item.rate} per hour</p>
+                                <p><strong>Description:</strong> {item.description}</p>
+                                <p><strong>Total Pay:</strong> ${item.totalCost.toFixed(2)}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p>No data loaded yet.</p>
+                    )}
                 </div>
             </div>
         </div>
