@@ -35,6 +35,7 @@ const AuthPage = () => { // Have the user log in or sign up, this should be the 
     const handleLogOut = async () => {
         const { success, error } = await logOut();
         if (success) {
+            alert('Logged out successfully!');
             navigate('/AuthPage');
         } else {
             alert(`Error logging out: ${error}`);
@@ -77,7 +78,7 @@ const AuthPage = () => { // Have the user log in or sign up, this should be the 
                             e.preventDefault();
                             handleLogOut();
                         }}
-                        className="btn btn-primary me-3"
+                        className="btn btn-secondary me-3"
                     >
                         Log Out
                     </button>

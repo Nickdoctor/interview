@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import '../Styles/TimeSheet.css';
 import { supabase } from '../supabaseClient.js';
+import TrashIcon from '../Assets/trash.svg';
 
 function TimeSheetPage() {
     const navigate = useNavigate();
@@ -87,13 +88,41 @@ function TimeSheetPage() {
             setLoadedData(data); // Update state with loaded data
         }
     };
+    const handleDelete = async (id) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this record?");
+        if (!confirmDelete) {
+            return; // Exit the function if the user cancels
+        }
 
-    const handleNavigation = (path) => {
-        return () => navigate(path);
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session) {
+            console.error('Error fetching session:', sessionError);
+            alert('You must be logged in to delete data.');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('timesheets')
+            .delete() // Delete the record
+            .eq('id', id); // Filter by user ID
+
+        if (error) {
+            console.error('Error deleting data:', error);
+            alert('Failed to delete data.');
+        } else {
+            alert('Record deleted successfully!');
+            handleLoad(); // Reload the data after deletion
+        }
     };
 
     const addLineItem = () => {
         setLineItems([...lineItems, { date: "", minutes: "" }]);
+    };
+
+    const handleRemove = (index) => {
+        const updated = [...lineItems];
+        updated.splice(index, 1);
+        setLineItems(updated);
     };
 
     const totalTime = lineItems.reduce((sum, item) => sum + Number(item.minutes || 0), 0);
@@ -128,6 +157,7 @@ function TimeSheetPage() {
                                 placeholder="Minutes"
                                 min="0"
                             />
+                            <img src={TrashIcon} alt="Trash Icon" width="24" height="24" onClick={() => handleRemove(index)} style={{ cursor: 'pointer' }} />
                         </div>
                     ))}
                 </div>
@@ -187,11 +217,11 @@ function TimeSheetPage() {
                 </div>
 
                 <div class="d-grid gap-2 col-6 mx-auto">
-                    <button variant="primary" class="btn btn-primary me-3 mb-4" 
-                     onClick={(e) => {
-                        e.preventDefault();
-                        handleSave();
-                    }}>
+                    <button variant="primary" class="btn btn-primary me-3 mb-4"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            handleSave();
+                        }}>
                         Save
                     </button>
                 </div>
@@ -200,18 +230,18 @@ function TimeSheetPage() {
                 {/* Load/Sign in and Out */}
                 <div class="d-grid gap-2 col-6 mx-auto">
                     <button variant="primary" class="btn btn-primary me-3 mb-4"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleLoad();
-                    }}>
+                        onClick={(e) => {
+                            e.preventDefault();
+                            handleLoad();
+                        }}>
                         Load Previous Data
                     </button>
                 </div>
                 <div class="d-grid gap-2 col-6 mx-auto">
-                    <button variant="primary" class="btn btn-secondary me-3 mb-4" 
-                    onClick={(e) => {
-                        e.preventDefault();
-                        handleNavigation('/AuthPage')
+                    <button variant="primary" class="btn btn-secondary me-3 mb-4"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            navigate('/AuthPage');
                         }}>
                         Sign In / Out
                     </button>
@@ -221,9 +251,9 @@ function TimeSheetPage() {
                 {/* Loaded Data */}
                 <div className="mt-6">
                     <h2 className="text-xl font-bold mb-4">Loaded Data</h2>
-                    {loadedData.length > 0 ? (
+                    {Array.isArray(loadedData) && loadedData.length > 0 ? (
                         loadedData.map((item, index) => (
-                            <div key={index} className="mb-6 p-4 border rounded-lg shadow">
+                            <div key={index} className="mb-6 p-4 border rounded-lg shadow" style={{ marginBottom: '20px' }}>
                                 <h3 className="text-lg font-bold mb-2">Entry {index + 1}</h3>
                                 {item.lineItems.map((lineItem, lineIndex) => (
                                     <div key={lineIndex} className="mb-4 p-4 border rounded-lg shadow bg-gray-50">
@@ -235,6 +265,15 @@ function TimeSheetPage() {
                                 <p><strong>Rate:</strong> ${item.rate} per hour</p>
                                 <p><strong>Description:</strong> {item.description}</p>
                                 <p><strong>Total Pay:</strong> ${item.totalCost.toFixed(2)}</p>
+                                <div class="d-grid gap-2 col-6 mx-auto">
+                                    <button variant="primary" class="btn btn-danger me-3 mb-4"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleDelete(item.id); // Pass the ID of the item to delete
+                                        }}>
+                                        Delete Record
+                                    </button>
+                                </div>
                             </div>
                         ))
                     ) : (
