@@ -79,7 +79,10 @@ function TimeSheetPage() {
             .select('*')
             .eq('userId', userId) // Filter by user ID
             .order('created_at', { ascending: false }); // Order by creation date
-
+        if (data.length ===0) {
+            alert('No data found for this user.');
+            console.error('Data returned no results:', data);
+        }
         if (error) {
             console.error('Error loading data:', error);
             alert('Failed to load data.');
@@ -237,17 +240,7 @@ function TimeSheetPage() {
                         Load Previous Data
                     </button>
                 </div>
-                <div class="d-grid gap-2 col-6 mx-auto">
-                    <button variant="primary" class="btn btn-secondary me-3 mb-4"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            navigate('/AuthPage');
-                        }}>
-                        Sign In / Out
-                    </button>
-                </div>
-
-
+                
                 {/* Loaded Data */}
                 <div className="mt-6">
                     <h2 className="text-xl font-bold mb-4">Loaded Data</h2>
