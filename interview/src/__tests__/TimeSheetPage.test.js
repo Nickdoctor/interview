@@ -1,7 +1,7 @@
 // TimeSheetPage.test.js
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import TimeSheetPage from '../Pages/TimeSheet.js';
+import TimeSheetPage from '../Pages/TimeSheet';
 import { BrowserRouter } from 'react-router-dom';
 
 jest.mock('../supabaseClient.js', () => ({

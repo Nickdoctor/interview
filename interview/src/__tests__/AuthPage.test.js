@@ -1,7 +1,7 @@
 // AuthPage.test.js
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import AuthPage from '../Pages/AuthPage.js';
+import AuthPage from '../Pages/AuthPage';
 import { BrowserRouter } from 'react-router-dom';
 
 jest.mock('../Utils/auth.js', () => ({
